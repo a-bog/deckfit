@@ -24,59 +24,61 @@ function renderTrainWarnings() {
 function buildQueue(totalSec, exTime, transTime, breakEvery, breakDuration) {
   const switchTime = Math.max(5, Math.round(transTime * 0.5));
 
-  // Push one exercise (both sides if sided) into queue
-  function addExercise(queue, ex) {
-    if (ex.sided) {
-      queue.push({ type: 'exercise',   ex, side: 'left',  duration: exTime });
-      queue.push({ type: 'transition', duration: switchTime, nextEx: ex, nextSide: 'right', isSideSwitch: true });
-      queue.push({ type: 'exercise',   ex, side: 'right', duration: exTime });
-    } else {
-      queue.push({ type: 'exercise', ex, side: null, duration: exTime });
-    }
-  }
-
-  // Estimate total slots that fit (approximate — sided slots cost ~2× time)
-  const estSlots = Math.max(1, Math.floor(totalSec / (exTime + transTime)));
-
-  // Split library: last 10% of slots = flexibility cool-down
-  const flexPool = shuffle(exercises.filter(e => e.category === 'flexibility'));
-  const workPool = shuffle(exercises.filter(e => e.category !== 'flexibility'));
-
-  const flexSlotCount = flexPool.length > 0 ? Math.max(1, Math.round(estSlots * 0.10)) : 0;
-  const mainSlotCount = estSlots - flexSlotCount;
+  // ── Step 1: figure out how many slots fit ──────────────────────────────────
+  // Use a dry-run to count slots precisely, so flex slots are always included.
+  // A slot costs: exTime (non-sided) or exTime*2 + switchTime (sided) + transTime after.
+  // We iterate from the library and count until we exceed totalSec.
+  const flexPool  = shuffle(exercises.filter(e => e.category === 'flexibility'));
+  const workPool  = shuffle(exercises.filter(e => e.category !== 'flexibility'));
 
   const mainOrdered = orderByPosition(workPool);
   const flexOrdered = orderByPosition(flexPool);
 
-  // Expand sequences, cycling if the session is longer than the library
+  // Estimate total slots assuming average non-sided cost, then derive flex/main split
+  const avgSlotCost = exTime + transTime;           // conservative estimate
+  const estSlots    = Math.max(2, Math.floor(totalSec / avgSlotCost));
+  const flexSlotCount = flexPool.length > 0 ? Math.max(1, Math.round(estSlots * 0.10)) : 0;
+  const mainSlotCount = estSlots - flexSlotCount;
+
+  // Expand, cycling if session is longer than library
   const mainSlots = Array.from({ length: mainSlotCount }, (_, i) => mainOrdered[i % mainOrdered.length]);
   const flexSlots = Array.from({ length: flexSlotCount }, (_, i) => flexOrdered[i % flexOrdered.length]);
+  const allSlots  = [...mainSlots, ...flexSlots];
 
-  const allSlots = [...mainSlots, ...flexSlots];
+  // ── Step 2: build the full queue for ALL slots, ignoring totalSec ──────────
+  // We guarantee flex slots are always emitted. After building, we trim to fit.
   const queue = [];
   let elapsed     = 0;
   let lastBreakAt = 0;
 
   for (let si = 0; si < allSlots.length; si++) {
-    const ex           = allSlots[si];
-    const isFirstFlex  = si === mainSlots.length;
+    const ex          = allSlots[si];
+    const isLast      = si === allSlots.length - 1;
+    const nextEx      = allSlots[si + 1];
+    const isLastMain  = si === mainSlots.length - 1;
 
-    // Insert a break before this slot if due (never between the two sides of a sided exercise)
-    if (elapsed > 0 && !isFirstFlex && elapsed - lastBreakAt >= breakEvery) {
+    if (ex.sided) {
+      // Sided pair: left -> switch-transition -> right, uninterruptible
+      queue.push({ type: 'exercise', ex, side: 'left',  duration: exTime });
+      elapsed += exTime;
+      queue.push({ type: 'transition', duration: switchTime, nextEx: ex, nextSide: 'right', isSideSwitch: true });
+      elapsed += switchTime;
+      queue.push({ type: 'exercise', ex, side: 'right', duration: exTime });
+      elapsed += exTime;
+    } else {
+      queue.push({ type: 'exercise', ex, side: null, duration: exTime });
+      elapsed += exTime;
+    }
+
+    // Break: only after a completed exercise/pair, never crossing into flex block
+    const breakDue = elapsed - lastBreakAt >= breakEvery;
+    if (breakDue && !isLast && !isLastMain) {
       queue.push({ type: 'break', duration: breakDuration });
       elapsed     += breakDuration;
       lastBreakAt  = elapsed;
     }
 
-    // Add the exercise slots and tally their time
-    const before = queue.length;
-    addExercise(queue, ex);
-    for (let k = before; k < queue.length; k++) elapsed += queue[k].duration;
-
-    if (elapsed >= totalSec) break;
-
-    // Transition to the next slot
-    const nextEx = allSlots[si + 1];
+    // Transition to next exercise (not after the very last slot)
     if (nextEx) {
       queue.push({
         type:     'transition',
@@ -86,9 +88,16 @@ function buildQueue(totalSec, exTime, transTime, breakEvery, breakDuration) {
       });
       elapsed += transTime;
     }
-
-    if (elapsed >= totalSec) break;
   }
+
+  // ── Step 3: trim trailing non-exercise steps ───────────────────────────────
+  // Session must never end on a transition or a break.
+  while (queue.length > 0 && queue[queue.length - 1].type !== 'exercise') {
+    elapsed -= queue[queue.length - 1].duration;
+    queue.pop();
+  }
+
+  console.log(queue)
 
   return { queue, totalDuration: elapsed };
 }
@@ -284,14 +293,13 @@ function togglePause() {
     : '<i class="ti ti-player-pause" aria-hidden="true"></i> Pause';
 }
 
-function skipExercise() {
-  clearInterval(sessionTimer);
-  sessionState.elapsedSoFar += sessionState.stepRemaining;
-  sessionState.queueIdx++;
-  advanceQueue();
-}
-
-function skipBreak() {
+function skip() {
+  if (sessionState.paused) {
+    sessionState.paused = false
+    document.getElementById('pause-btn').innerHTML = sessionState.paused
+      ? '<i class="ti ti-player-play" aria-hidden="true"></i> Resume'
+      : '<i class="ti ti-player-pause" aria-hidden="true"></i> Pause';
+  }
   clearInterval(sessionTimer);
   sessionState.elapsedSoFar += sessionState.stepRemaining;
   sessionState.queueIdx++;
