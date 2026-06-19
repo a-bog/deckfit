@@ -61,19 +61,19 @@ function buildQueue(totalSec, exTime, transTime, breakEvery, breakDuration) {
     const ex           = allSlots[si];
     const isFirstFlex  = si === mainSlots.length;
 
-    // Insert a break before this slot if due (never between the two sides of a sided exercise)
-    if (elapsed > 0 && !isFirstFlex && elapsed - lastBreakAt >= breakEvery) {
-      queue.push({ type: 'break', duration: breakDuration });
-      elapsed     += breakDuration;
-      lastBreakAt  = elapsed;
-    }
-
     // Add the exercise slots and tally their time
     const before = queue.length;
     addExercise(queue, ex);
     for (let k = before; k < queue.length; k++) elapsed += queue[k].duration;
 
     if (elapsed >= totalSec) break;
+
+    // Insert a break after this exercise if due (never between the two sides of a sided exercise)
+    if (elapsed > 0 && !isFirstFlex && elapsed - lastBreakAt >= breakEvery ) {
+      queue.push({ type: 'break', duration: breakDuration });
+      elapsed     += breakDuration;
+      lastBreakAt  = elapsed;
+    }
 
     // Transition to the next slot
     const nextEx = allSlots[si + 1];
@@ -284,14 +284,14 @@ function togglePause() {
     : '<i class="ti ti-player-pause" aria-hidden="true"></i> Pause';
 }
 
-function skipExercise() {
-  clearInterval(sessionTimer);
-  sessionState.elapsedSoFar += sessionState.stepRemaining;
-  sessionState.queueIdx++;
-  advanceQueue();
-}
+function skip() {
+  if (sessionState.paused) {
+    sessionState.paused = false
+    document.getElementById('pause-btn').innerHTML = sessionState.paused
+      ? '<i class="ti ti-player-play" aria-hidden="true"></i> Resume'
+      : '<i class="ti ti-player-pause" aria-hidden="true"></i> Pause';
 
-function skipBreak() {
+  }
   clearInterval(sessionTimer);
   sessionState.elapsedSoFar += sessionState.stepRemaining;
   sessionState.queueIdx++;
