@@ -27,6 +27,31 @@ A browser-based workout app for bodyweight training in small spaces — built fo
 
 ---
 
+## Testing
+
+The project includes a Jest test suite covering the core logic and UI components. To run the tests locally:
+
+```bash
+# Install dependencies
+npm install
+
+# Run the test suite
+npm test
+```
+
+The test suite includes:
+
+- **Queue Builder Tests** (`tests/queue-builder.test.js`): Verifies flexibility exercises are included, break intervals are respected, and the queue ends correctly
+- **Session State Tests** (`tests/session-state.test.js`): Validates session lifecycle, pause/resume functionality, and elapsed time tracking
+- **UI Rendering Tests** (`tests/render-test.js`): Checks exercise display, countdown beeps, and control states
+- **Controls Tests** (`tests/controls.test.js`): Tests skip and pause/resume functionality
+
+## Continuous Integration
+
+A GitHub Actions workflow ([`.github/workflows/tests.yml`](.github/workflows/tests.yml)) runs on every push to `main` and on pull requests. This ensures code changes don't break existing functionality.
+
+---
+
 ## Getting Started
 
 ### Running locally
