@@ -1,6 +1,7 @@
 // queue-builder.test.js
 
-const { buildQueue } = require('../../js/training'); // Adjust path as needed
+//const { buildQueue } = require('../js/training.js');
+import { buildQueue } from '../js/training.js';
 
 describe('Queue Builder', () => {
   const mockExercises = [
