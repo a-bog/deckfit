@@ -30,11 +30,11 @@ function playTone(freq, duration, gainVal, startDelay) {
 const beepService = {
   playTone,
   playCountdownBeep() {
-    playTone(660, 0.12, 0.18, 0);
+    beepService.playTone(660, 0.12, 0.18, 0);
   },
   playDoubleBeep() {
-    playTone(880, 0.18, 0.35, 0);
-    playTone(880, 0.18, 0.35, 0.28);
+    beepService.playTone(880, 0.18, 0.35, 0);
+    beepService.playTone(880, 0.18, 0.35, 0.28);
   }
 };
 
@@ -55,6 +55,6 @@ if (typeof module !== 'undefined' && module.exports) {
     playDoubleBeep,
     playTone,
     getAudioCtx,
+    setAudioCtx: (ctx) => { audioCtx = ctx; },
   };
 }
-

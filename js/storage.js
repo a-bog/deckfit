@@ -1,3 +1,14 @@
+// ── Node module loading support ───────────────────────────────────────────────
+
+if (typeof module !== 'undefined') {
+  if (typeof DEFAULT_EXERCISES === 'undefined') {
+    const data = require('./data');
+    global.DEFAULT_EXERCISES = data.DEFAULT_EXERCISES;
+    global.STORAGE_KEY = data.STORAGE_KEY;
+    global.API_KEY_STORAGE = data.API_KEY_STORAGE;
+  }
+}
+
 // ── Exercise storage ──────────────────────────────────────────────────────────
 
 function loadExercises() {
@@ -17,6 +28,7 @@ function loadExercises() {
     exercises = [...DEFAULT_EXERCISES];
   }
   saveExercises();
+  return exercises;
 }
 
 function saveExercises() {
@@ -27,14 +39,28 @@ function saveExercises() {
 
 function loadApiKey() {
   const key = localStorage.getItem(API_KEY_STORAGE) || '';
-  document.getElementById('api-key-input').value = key;
+  const input = document.getElementById('api-key-input');
+  if (input) input.value = key;
+  return key;
 }
 
 function saveApiKey() {
-  const key = document.getElementById('api-key-input').value.trim();
+  const input = document.getElementById('api-key-input');
+  const key = input ? input.value.trim() : '';
   localStorage.setItem(API_KEY_STORAGE, key);
+  return key;
 }
 
 function getApiKey() {
   return localStorage.getItem(API_KEY_STORAGE) || '';
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    loadExercises,
+    saveExercises,
+    loadApiKey,
+    saveApiKey,
+    getApiKey,
+  };
 }
