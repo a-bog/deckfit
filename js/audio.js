@@ -3,13 +3,16 @@
 let audioCtx = null;
 
 function getAudioCtx() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioCtx && typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
   return audioCtx;
 }
 
 function playTone(freq, duration, gainVal, startDelay) {
   try {
     const ctx = getAudioCtx();
+    if (!ctx) return;
     const osc  = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -24,13 +27,34 @@ function playTone(freq, duration, gainVal, startDelay) {
   } catch (e) { /* audio unavailable */ }
 }
 
+const beepService = {
+  playTone,
+  playCountdownBeep() {
+    beepService.playTone(660, 0.12, 0.18, 0);
+  },
+  playDoubleBeep() {
+    beepService.playTone(880, 0.18, 0.35, 0);
+    beepService.playTone(880, 0.18, 0.35, 0.28);
+  }
+};
+
 // Short soft tick for the 5-second countdown
 function playCountdownBeep() {
-  playTone(660, 0.12, 0.18, 0);
+  beepService.playCountdownBeep();
 }
 
 // Two sharp beeps marking the end of an exercise
 function playDoubleBeep() {
-  playTone(880, 0.18, 0.35, 0);
-  playTone(880, 0.18, 0.35, 0.28);
+  beepService.playDoubleBeep();
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    beepService,
+    playCountdownBeep,
+    playDoubleBeep,
+    playTone,
+    getAudioCtx,
+    setAudioCtx: (ctx) => { audioCtx = ctx; },
+  };
 }

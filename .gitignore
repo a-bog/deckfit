@@ -1,2 +1,6 @@
 # MacOS related
 .DS_*
+
+# Testing related
+node_modules
+coverage

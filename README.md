@@ -27,6 +27,39 @@ A browser-based workout app for bodyweight training in small spaces — built fo
 
 ---
 
+## Testing
+
+The project includes a Jest test suite covering the core logic and UI components. To run the tests locally:
+
+```bash
+# Install dependencies
+npm install
+
+# Run the test suite
+npm test
+
+# Run tests with code coverage report
+npm test -- --coverage
+```
+
+The test suite includes:
+
+- **Queue Builder Tests** (`tests/queue-builder.test.js`): Verifies flexibility exercises are included, break intervals are respected, and the queue ends correctly
+- **Session State Tests** (`tests/session-state.test.js`): Validates session lifecycle, pause/resume functionality, and elapsed time tracking
+- **UI Rendering Tests** (`tests/render-test.js`): Checks exercise display, countdown beeps, and control states
+- **Controls Tests** (`tests/controls.test.js`): Tests skip, pause/resume, and session completion
+- **Storage Tests** (`tests/storage.test.js`): Tests exercise and API key persistence in `localStorage`
+- **Library Tests** (`tests/library.test.js`): Tests exercise search, filtering, add/edit/delete modals, and AI exercise generation
+- **Utility Tests** (`tests/utils.test.js`): Tests capitalization, ID generation, YouTube embed parsing, shuffling, and position-change minimisation
+- **Audio Tests** (`tests/audio.test.js`): Tests Web Audio API context management and countdown/double beeps
+- **App Tests** (`tests/app.test.js`): Tests tab navigation, modal backdrop closing, and app initialization
+
+## Continuous Integration
+
+A GitHub Actions workflow ([`.github/workflows/tests.yml`](.github/workflows/tests.yml)) runs on every push to `main` and on pull requests. This ensures code changes don't break existing functionality.
+
+---
+
 ## Getting Started
 
 ### Running locally

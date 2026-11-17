@@ -27,4 +27,17 @@ function init() {
   renderLibrary();   // library.js — renders exercise list
 }
 
-document.addEventListener('DOMContentLoaded', init);
+if (typeof document !== 'undefined' && document.addEventListener) {
+  document.addEventListener('DOMContentLoaded', init);
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    get exercises() { return exercises; },
+    set exercises(v) { exercises = v; },
+    switchTab,
+    bgClose,
+    init,
+  };
+}
+
