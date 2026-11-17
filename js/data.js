@@ -114,3 +114,13 @@ const DEFAULT_EXERCISES = [
   { id: 'e99', name: 'Supine spinal twist', category: 'flexibility', position: 'floor',   difficulty: 'beginner',     sided: true,  emoji: '\u{1F300}', description: 'Lie on back, pull one knee across the body toward the opposite floor, arms extended out to the sides. Let gravity pull the knee down and breathe. A restorative lower-back release -- perfect as a session cool-down.', videoUrl: 'https://www.youtube.com/watch?v=7PFmCXFDLTo' },
   { id: 'e100', name: 'Diaphragmatic breathing', category: 'flexibility', position: 'floor', difficulty: 'beginner', sided: false, emoji: '\u{1FAC1}', description: 'Lie on back, one hand on chest one on belly. Inhale slowly expanding the belly without raising the chest, exhale fully. Activates the parasympathetic system -- essential recovery and stress management for offshore sailing.', videoUrl: 'https://www.youtube.com/watch?v=kgTL5G0w4FQ' },
 ];
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    STORAGE_KEY,
+    API_KEY_STORAGE,
+    CATEGORY_COLORS,
+    DEFAULT_EXERCISES,
+  };
+}
+

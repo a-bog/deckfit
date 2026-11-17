@@ -43,3 +43,14 @@ function orderByPosition(pool) {
   }
   return ordered;
 }
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    cap,
+    uid,
+    ytEmbed,
+    shuffle,
+    orderByPosition,
+  };
+}
+

@@ -1,7 +1,6 @@
 // queue-builder.test.js
 
-//const { buildQueue } = require('../js/training.js');
-import { buildQueue } from '../js/training.js';
+const { buildQueue } = require('../js/training.js');
 
 describe('Queue Builder', () => {
   const mockExercises = [
@@ -10,6 +9,10 @@ describe('Queue Builder', () => {
     { name: 'squat', category: 'strength', position: 'left', sided: true },
     { name: 'plank', category: 'flexibility', position: 'center', sided: false }
   ];
+
+  beforeEach(() => {
+    exercises = [...mockExercises];
+  });
 
   it('should include flexibility exercises in slots', () => {
     const { queue } = buildQueue(60, 5, 2, 120, 30);
@@ -39,6 +42,7 @@ describe('Queue Builder', () => {
   });
 
   it('should handle empty exercise list gracefully', () => {
+    exercises = [];
     const { queue } = buildQueue(30, 5, 2, 120, 30);
 
     expect(Array.isArray(queue)).toBe(true);

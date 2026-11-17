@@ -1,10 +1,14 @@
 // session-state.test.js
 
-const { Session } = require('../../src/session'); // Adjust path as needed
+const { Session } = require('../js/training.js');
 
 describe('Session State Management', () => {
   beforeEach(() => {
     // Mock local state if needed
+    Session.current = null;
+  });
+
+  afterEach(() => {
     Session.current = null;
   });
 

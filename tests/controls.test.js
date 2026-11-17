@@ -6,6 +6,12 @@ describe('Session Controls', () => {
     document.body.innerHTML = '';
   });
 
+  afterEach(() => {
+    if (typeof sessionTimer !== 'undefined' && sessionTimer) {
+      clearInterval(sessionTimer);
+    }
+  });
+
   it('should resume correctly from pause', async () => {
     // Setup exercises
     exercises = [

@@ -28,6 +28,8 @@ describe('Session UI Rendering', () => {
       { name: 'rest', category: 'flexibility', description: 'Rest position' }
     ];
 
+    const beepSpy = jest.spyOn(beepService, 'playCountdownBeep');
+
     renderSessionSetup();
     fireEvent.click(screen.getByRole('button', { name: 'Start' }));
 
@@ -35,8 +37,8 @@ describe('Session UI Rendering', () => {
     await delay(500);
 
     // Verify countdown beep was called
-    const beepSpy = jest.spyOn(beepService, 'playCountdownBeep');
     expect(beepSpy).toHaveBeenCalled();
+    beepSpy.mockRestore();
   });
 
   it('should handle pause/resume controls', () => {
